@@ -164,6 +164,8 @@ class _FullScreenTimerState extends State<FullScreenTimer>
     final timerProgress = widget.secondsRemaining / widget.totalSeconds;
     final screenSize = MediaQuery.of(context).size;
 
+    final timerSize = _calculateResponsiveTimerSize(screenSize);
+
     return GestureDetector(
       onLongPressStart: (_) => _startHold(),
       onLongPressEnd: (_) => _cancelHold(),
@@ -186,11 +188,11 @@ class _FullScreenTimerState extends State<FullScreenTimer>
                 alignment: Alignment.center,
                 children: [
                   SizedBox(
-                    width: screenSize.width * 0.8,
-                    height: screenSize.width * 0.8,
+                    width: timerSize,
+                    height: timerSize,
                     child: CircularProgressIndicator(
                       value: 1 - timerProgress,
-                      strokeWidth: 10,
+                      strokeWidth: timerSize * 0.0125,
                       backgroundColor: modeColor.withValues(alpha: 0.2),
                       valueColor: AlwaysStoppedAnimation<Color>(modeColor),
                     ),
@@ -202,8 +204,8 @@ class _FullScreenTimerState extends State<FullScreenTimer>
                     children: [
                       Text(
                         _formatTime(widget.secondsRemaining),
-                        style: const TextStyle(
-                          fontSize: 80,
+                        style: TextStyle(
+                          fontSize: timerSize * 0.25,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
                         ),
@@ -211,7 +213,7 @@ class _FullScreenTimerState extends State<FullScreenTimer>
                       Text(
                         _getModeText(widget.mode),
                         style: TextStyle(
-                          fontSize: 18,
+                          fontSize: timerSize * 0.056,
                           color: modeColor,
                           fontWeight: FontWeight.w500,
                         ),
@@ -285,8 +287,7 @@ class _FullScreenTimerState extends State<FullScreenTimer>
                                 duration: const Duration(milliseconds: 100),
                                 height: 4,
                                 width:
-                                    MediaQuery.of(context).size.width *
-                                    0.8 *
+                                    (MediaQuery.of(context).size.width - 160) *
                                     _holdProgress,
                                 color: modeColor,
                               ),
@@ -302,5 +303,19 @@ class _FullScreenTimerState extends State<FullScreenTimer>
         ),
       ),
     );
+  }
+
+  double _calculateResponsiveTimerSize(Size screenSize) {
+    final smallerDimension =
+        screenSize.width < screenSize.height
+            ? screenSize.width
+            : screenSize.height;
+
+    // On small to medium screens, use 80% of the smaller dimension
+    double baseSize = smallerDimension * 0.8;
+
+    final maxSize = 400.0;
+
+    return baseSize > maxSize ? maxSize : baseSize;
   }
 }
